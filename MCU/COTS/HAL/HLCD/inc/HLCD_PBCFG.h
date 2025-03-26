@@ -1,0 +1,8 @@
+#ifndef HLCD_PBCFG_H
+#define HLCD_PBCFG_H
+
+#define HLCD_8_BIT_MODE 0
+#define HLCD_4_BIT_MODE 1
+#define HLCD_MODE_OF_OPERATION HLCD_8_BIT_MODE
+
+#endif
