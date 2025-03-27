@@ -2,9 +2,9 @@
 
 # Tasks --- Java:
 - [ ] Class for USART communication &rarr; [sendByte() && receiveByte()] [set baudrate to 9600 + 1 start + 1 stop + 8 bit-data + 0 parity] **A**
-- [ ] GUI for Required Scene. **R**
+- [x] GUI for Required Scene. **R**
 - [ ] Slider handler for required scene. **O**
-- [ ] TextField for speed + dir. **R**
+- [x] TextField for speed + dir. **R**
 - [ ] TextField for acknowledgement. **R**
 - [ ] EXTRA: GUI for Air Conditioner
 - [ ] EXTRA: Handlers for Knob + Toggle Switch
