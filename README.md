@@ -40,3 +40,15 @@
 	1. Bit 3-0 -> Speed &rarr; values from 0 to 15 will be scaled accordingly.
 1. PWM signal should use received `speed` && `dir` fields to drive the motor.
 1. Upon receiving a valid frame from JavaFX app, send a USART acknowledgement frame `0xFF` to GUI app.
+
+# MCU [Actual Requirements]
+1. Scheduler -> every 500ms run function
+
+> USART IRQ:
+1. upon receiving a byte (data), save it in some global variable THEN send Ack.
+
+> Scheduled Function:
+1. [Alternative --- NOT NEEDED **if USART IRQ is used**] wait until data byte is received THEN send Ack.
+1. Extract data from received byte.
+1. If ID is the same as old ID &rarr; stop motor, light up a red LED, return [This makes MCU check for received byte each time Scheduled function is invoked to resume immediately after connection is back].
+1. Else, Drive motor with specified speed and direction + light up a green LED.
