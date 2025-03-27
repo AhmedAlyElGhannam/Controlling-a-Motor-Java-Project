@@ -133,34 +133,7 @@ public class App extends Application {
         }
     }
 
-    private char bridgeValue() {
-        int mappedSpeed;
-        switch (Math.abs(motorSpeed)) {
-            case 0:  mappedSpeed = 0; break;
-            case 10: mappedSpeed = 3; break;
-            case 20: mappedSpeed = 6; break;
-            case 30: mappedSpeed = 9; break;
-            case 40: mappedSpeed = 12; break;
-            case 50: mappedSpeed = 15; break;
-            default: mappedSpeed = 0;
-        }
 
-        int directionBit = (motorSpeed < 0) ? 1 : 0;
-        char result = (char) (
-            (frameCounter << 5) |
-            (directionBit << 4) |
-            mappedSpeed
-        );
-        
-        System.out.printf("Speed: %d, Dir: %s, ID: %d -> Binary: %8s%n",
-            motorSpeed,
-            directionBit == 0 ? "CW" : "CCW",
-            frameCounter,
-            String.format("%8s", Integer.toBinaryString(result & 0xFF)).replace(' ', '0'));
-        
-        frameCounter = (frameCounter + 1) & 0x07;
-        return result;
-    }
 
     public static void main(String[] args) {
         launch(args);
