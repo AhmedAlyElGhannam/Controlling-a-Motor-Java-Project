@@ -1,22 +1,21 @@
 # Controlling-a-Motor-Java-Project
 
 # Tasks --- Java:
-- [ ] Class for USART communication &rarr; [sendByte() && receiveByte()] [set baudrate to 9600 + 1 start + 1 stop + 8 bit-data + 0 parity] **A**
+- [x] Class for USART communication &rarr; [sendByte() && receiveByte()] [set baudrate to 9600 + 1 start + 1 stop + 8 bit-data + 0 parity] **A**
 - [x] GUI for Required Scene. **R**
-- [ ] Slider handler for required scene. **O**
+- [x] Slider handler for required scene. **O**
 - [x] TextField for speed + dir. **R**
 - [ ] TextField for acknowledgement. **R**
 - [ ] EXTRA: GUI for Air Conditioner
 - [ ] EXTRA: Handlers for Knob + Toggle Switch
 
 # Tasks --- MCU Motor Control:
-- [x] USART Driver.
+- [ ] USART Driver.
 - [ ] PWM Driver. **R**
 - [x] Scheduler (Timer) Driver.
 - [x] DIO/GPIO Driver for LEDs.
-- [ ] Receiver logic for speed/dir/id extraction/validation. **O**
-- [ ] Sender logic for acknowledge frame. **A**
-- [ ] PWM signal for motor control (speed/dir). **R**
+- [ ] USART IRQ that handles data reception && ack byte transmission. **O**
+- [ ] Scheduled function that does the speed control logic. **R**
 
 # JavaFX
 1. Class for USART communication ###
