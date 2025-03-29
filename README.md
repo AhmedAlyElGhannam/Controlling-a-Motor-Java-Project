@@ -12,7 +12,7 @@
 
 # Tasks --- MCU Motor Control:
 - [ ] USART Driver.
-- [ ] PWM Driver. **R**
+- [x] PWM Driver. **R**
 - [x] Scheduler (Timer) Driver.
 - [x] DIO/GPIO Driver for LEDs.
 - [ ] USART IRQ that handles data reception && ack byte transmission. **O**
