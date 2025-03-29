@@ -1,10 +1,11 @@
 # Controlling-a-Motor-Java-Project
 
 # Tasks --- Java:
-- [x] Class for USART communication &rarr; [sendByte() && receiveByte()] [set baudrate to 9600 + 1 start + 1 stop + 8 bit-data + 0 parity] **A**
+- [x] SerialCommManager class for handling USART communication periodically.  **A**
 - [x] GUI for Required Scene. **R**
 - [x] Slider handler for required scene. **O**
 - [x] TextField for speed + dir. **R**
+- [x] App integration with SerialCommManager. **A** 
 - [ ] TextField for acknowledgement. **R**
 - [ ] EXTRA: GUI for Air Conditioner
 - [ ] EXTRA: Handlers for Knob + Toggle Switch
