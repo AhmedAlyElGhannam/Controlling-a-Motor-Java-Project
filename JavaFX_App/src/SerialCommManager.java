@@ -184,8 +184,8 @@ public class SerialCommManager {
         executor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-	        	// as long as communication is alive && thread is not interrupted
-                while (!Thread.currentThread().isInterrupted() && !communicationFailed) {
+	        // if communication is alive && thread is not interrupted
+                if (!Thread.currentThread().isInterrupted() && !communicationFailed) {
                     try {
                     	// beginning of critical section (lock is acquired)
                         lock.lock();
@@ -224,7 +224,7 @@ public class SerialCommManager {
                     	// in case an exception has happened, call this method
                         handleFailure();
                     }
-                }
+                } else {}
             }
         }, 0, TX_PERIODICITY, TimeUnit.MILLISECONDS);
     }
