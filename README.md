@@ -11,7 +11,7 @@
 - [ ] EXTRA: Handlers for Knob + Toggle Switch
 
 # Tasks --- MCU Motor Control:
-- [ ] USART Driver.
+- [x] USART Driver.
 - [x] PWM Driver. **R**
 - [x] Scheduler (Timer) Driver.
 - [x] DIO/GPIO Driver for LEDs.
