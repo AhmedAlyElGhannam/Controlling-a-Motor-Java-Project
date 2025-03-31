@@ -2,11 +2,18 @@
 cmake_minimum_required(VERSION 3.22)
 
 # project name + defining used languages
-project(MPWM)
+project(HMOTOR) 
 enable_language(C)
 
 # collect library source files
 file(GLOB_RECURSE ${PROJECT_NAME}_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c)
+
+# defining a list of MCAL libraries used in this HAL library
+set(MCAL_LIB
+	MPORT
+	MDIO
+	MPWM
+)
 
 # create a static library
 add_library(${PROJECT_NAME} STATIC "${${PROJECT_NAME}_SRC_FILES}")
@@ -28,13 +35,10 @@ target_link_options( ${PROJECT_NAME}
 )
 
 # link with required MCAL libraries
-target_link_libraries(${PROJECT_NAME} PRIVATE MPORT)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${MCAL_LIB})
 
 # in order to allow main to use .h & pbcfg.h -> make them interface
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc)
 
 # std_lib will be public to anyone who wants to use though this MCAL lib
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../STD_LIB/inc)
-
-# registers should ABSOLUTELY BE private
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/inc/priv)

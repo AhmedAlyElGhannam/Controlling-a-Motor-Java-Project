@@ -30,6 +30,7 @@ set(MCAL_LIB
 	MEXTI
 	MTIMER
 	MUSART
+	MPWM
 )
 
 # looping over all libs to build them
@@ -46,6 +47,7 @@ set(HAL_LIB
 	HSWITCH
 	H7SEGMENT
 	HSCHEDULER
+	HMOTOR
 )
 
 # looping over all HAL libs to build them
