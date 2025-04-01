@@ -14,7 +14,7 @@
 /* array that stores LED configuration and sets it at runtime */
 HLED_structLEDConfig_t Global_HLED_structLEDConfigArr[NUM_OF_LEDS] =
 {
-    [HLED_VALID_ID] = 
+    [HLED_INVALID_ID] = 
     {
         .portNum = HAL_PORTA,
         .pinNum = HAL_PIN0,

@@ -28,21 +28,21 @@ TIMER0_ERROR_STATUS Timer0_SetCompareMatchCallback(Timer0_Callback callback) {
 	return TIMER0_OK;
 }
 
-// Timer0 overflow interrupt service routine
-void __vector_11(void) __attribute__((signal, used));
-void __vector_11(void) {
-	if (overflowCallback != NULL) {
-		overflowCallback(); // Call the overflow callback
-	}
-}
+// // Timer0 overflow interrupt service routine
+// void __vector_11(void) __attribute__((signal, used));
+// void __vector_11(void) {
+// 	if (overflowCallback != NULL) {
+// 		overflowCallback(); // Call the overflow callback
+// 	}
+// }
 
-// Timer0 compare match interrupt service routine
-void __vector_10(void) __attribute__((signal, used));
-void __vector_10(void) {
-	if (compareMatchCallback != NULL) {
-		compareMatchCallback(); // Call the compare match callback
-	}
-}
+// // Timer0 compare match interrupt service routine
+// void __vector_10(void) __attribute__((signal, used));
+// void __vector_10(void) {
+// 	if (compareMatchCallback != NULL) {
+// 		compareMatchCallback(); // Call the compare match callback
+// 	}
+// }
 
 // Enable global interrupts
 void Timer0_EnableGlobalInterrupts(void) {

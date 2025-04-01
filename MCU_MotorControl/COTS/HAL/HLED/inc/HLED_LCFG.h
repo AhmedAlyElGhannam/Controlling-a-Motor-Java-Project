@@ -10,6 +10,6 @@ typedef struct
 } HLED_structLEDConfig_t;
 
 /* macro to define the first defined LED */
-#define FIRST_LED       HLED_VALID_ID
+#define FIRST_LED       HLED_INVALID_ID
 
 #endif
