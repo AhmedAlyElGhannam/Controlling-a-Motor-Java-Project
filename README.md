@@ -15,8 +15,8 @@
 - [x] PWM Driver. **R**
 - [x] Scheduler (Timer) Driver. 
 - [x] DIO/GPIO Driver for LEDs. 
-- [ ] USART IRQ that handles data reception && ack byte transmission. **O**
-- [ ] Scheduled function that does the speed control logic. **A**
+- [x] USART IRQ that handles data reception && ack byte transmission. **O**
+- [x] Scheduled function that does the speed control logic. **A**
 
 # JavaFX
 1. Class for USART communication ###
