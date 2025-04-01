@@ -8,7 +8,7 @@ HSCHEDULER_structRunnable_t HSCHEDULER_structRunnableArr[NUM_OF_RUNNABLES] =
 {
     [RUNNABLE_MOTOR_CON] = 
     {
-        .period = 500U,
+        .period = 250U,
         .firstDelay = 0,
         .cbf = APP_voidScheduledControlFunc
     }

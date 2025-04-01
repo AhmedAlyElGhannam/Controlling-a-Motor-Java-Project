@@ -18,6 +18,7 @@ typedef enum
 volatile static uint8_t global_uint8IsFirstReceivedByte = true;
 volatile static uint8_t global_uint8HasReceivedDataWithinWindow = false;
 volatile static uint8_t global_uint8HasTimedOut = false;
+volatile static uint8_t global_uint8CalledWithoutNewDataCounter = 0;
 
 volatile static uint8_t arr_uint8CurrDataFields[NUM_OF_DATA_FIELDS];
 volatile static uint8_t arr_uint8PrevDataFields[NUM_OF_DATA_FIELDS];
@@ -25,7 +26,7 @@ volatile static uint8_t arr_uint8PrevDataFields[NUM_OF_DATA_FIELDS];
 void echoReceivedByte(u8 data)
 {
     /* transfer received data into a variable */
-    arr_uint8CurrDataFields[FULL_DATA_BYTE] =  UART_ReceiveByte();
+    arr_uint8CurrDataFields[FULL_DATA_BYTE] =  UDR;
     UART_SendByte(ACK_BYTE);    
     global_uint8HasReceivedDataWithinWindow = true;  
     HLED_uint8SetLEDValue(HLED_RECEPTION_SUCCESSFUL, HLED_ON);
@@ -176,5 +177,7 @@ void APP_voidScheduledControlFunc(void)
         HLED_uint8SetLEDValue(HLED_TIMEOUT, HLED_ON);
 
         global_uint8HasTimedOut = true;
+
+        global_uint8CalledWithoutNewDataCounter++;
     }
 }
