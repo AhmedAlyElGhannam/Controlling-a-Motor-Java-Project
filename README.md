@@ -13,10 +13,10 @@
 # Tasks --- MCU Motor Control:
 - [x] USART Driver. **O**
 - [x] PWM Driver. **R**
-- [x] Scheduler (Timer) Driver. **A**
-- [x] DIO/GPIO Driver for LEDs. **A**
+- [x] Scheduler (Timer) Driver. 
+- [x] DIO/GPIO Driver for LEDs. 
 - [ ] USART IRQ that handles data reception && ack byte transmission. **O**
-- [ ] Scheduled function that does the speed control logic. **R**
+- [ ] Scheduled function that does the speed control logic. **A**
 
 # JavaFX
 1. Class for USART communication ###
