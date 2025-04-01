@@ -1,0 +1,12 @@
+*.elf
+*.hex
+*.bin
+*.map
+*.lst
+*.d
+*.o
+*.a
+*.dSYM
+*.exe
+*.out
+docs/

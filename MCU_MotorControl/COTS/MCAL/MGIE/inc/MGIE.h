@@ -1,0 +1,35 @@
+#ifndef MGIE_H
+#define MGIE_H
+
+typedef enum 
+{
+    MGIE_RESET = 0,
+    MGIE_EXTI0,
+    MGIE_EXTI1,
+    MGIE_EXTI2,
+    MGIE_TIMER2_COMPARE_MATCH,
+    MGIE_TIMER2_OVERFLOW,
+    MGIE_TIMER1_CAPTURE_EVENT,
+    MGIE_TIMER1_COMPARE_MATCH_A,
+    MGIE_TIMER1_COMPARE_MATCH_B,
+    MGIE_TIMER1_OVERFLOW,
+    MGIE_TIMER0_COMPARE_MATCH,
+    MGIE_TIMER0_OVERFLOW,
+    MGIE_SPI_SERIAL_TRANSFER_COMPLETE,
+    MGIE_USART_RX_COMPLETE,
+    MGIE_USART_DATA_REGISTER_EMPTY,
+    MGIE_USART_TX_COMPLETE,
+    MGIE_ADC_CONVERSION_COMPLETE,
+    MGIE_EEPROM_READY,
+    MGIE_ANALOG_COMPARATOR,
+    MGIE_TWO_WIRE_SERIAL_INTERFACE,
+    MGIE_STORE_PROGRAM_MEMORY_READY,
+    MGIE_NUM_OF_INTERRUPTS
+} MGIE_enuVectorTable_t;
+
+typedef void (*MGIE_CallBackFunction_t)(void);
+
+#define cli()  __asm__ __volatile__ ("cli" ::: "memory")
+#define sei()  __asm__ __volatile__ ("sei" ::: "memory")
+
+#endif
