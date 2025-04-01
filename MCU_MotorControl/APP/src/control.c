@@ -26,12 +26,11 @@ volatile static uint8_t arr_uint8PrevDataFields[NUM_OF_DATA_FIELDS];
 void echoReceivedByte(u8 data)
 {
     /* transfer received data into a variable */
-    arr_uint8CurrDataFields[FULL_DATA_BYTE] =  UDR;
+    arr_uint8CurrDataFields[FULL_DATA_BYTE] =  data;
     UART_SendByte(ACK_BYTE);    
     global_uint8HasReceivedDataWithinWindow = true;  
     HLED_uint8SetLEDValue(HLED_RECEPTION_SUCCESSFUL, HLED_ON);
 }
-
 
 void APP_voidExtractDataFromReceivedByte(void)
 {
