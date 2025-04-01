@@ -27,8 +27,8 @@ typedef double float64_t;
 
 typedef enum
 {
-    true = 1,
-    false = 0,
+    true = 1U,
+    false = !true,
 } bool;
 
 #endif

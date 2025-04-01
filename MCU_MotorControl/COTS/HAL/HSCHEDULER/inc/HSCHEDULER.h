@@ -4,7 +4,7 @@
 
 typedef enum 
 {
-    RUNNABLE_LED = 0,
+    RUNNABLE_MOTOR_CON = 0,
     RUNNABLE_LCD,
     RUNNABLE_PWM,
     RUNNABLE_SWITCH,

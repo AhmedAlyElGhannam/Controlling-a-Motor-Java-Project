@@ -9,10 +9,7 @@ typedef struct
     HLED_enuLEDConnection_t connection;
 } HLED_structLEDConfig_t;
 
-/* macro to define the number of used LEDs */
-#define NUM_OF_LEDS     3
-
 /* macro to define the first defined LED */
-#define FIRST_LED       HLED_START
+#define FIRST_LED       HLED_VALID_ID
 
 #endif

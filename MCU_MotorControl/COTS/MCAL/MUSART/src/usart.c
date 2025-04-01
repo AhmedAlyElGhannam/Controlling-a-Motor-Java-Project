@@ -80,11 +80,11 @@ void UART_Init(const UART_Config_t *config)
 	UCSRB = (1 << RXCIE) | (1 << TXEN) | (1 << RXEN);
 
 	/* Debug output */
-	UART_SendString("UART Ready - Echo Test\r\n");
-	if (userRxCallback == NULL)
-	{
-		UART_SendString("WARNING: No callback set!\r\n");
-	}
+	// UART_SendString("UART Ready - Echo Test\r\n");
+	// if (userRxCallback == NULL)
+	// {
+	// 	UART_SendString("WARNING: No callback set!\r\n");
+	// }
 }
 
 /**

@@ -76,6 +76,36 @@ void APP_voidCpyDataHistory(void)
     }
 }
 
+uint8_t APP_uint8MapSpeedLvlToPercentage(void)
+{
+    uint8_t local_uint8SpeedPercentage = 0;
+
+    switch (arr_uint8CurrDataFields[SPEED_LVL])
+    {
+        case 3:
+            local_uint8SpeedPercentage = 20;
+        break;
+
+        case 6:
+            local_uint8SpeedPercentage = 40;
+        break;
+
+        case 9:
+            local_uint8SpeedPercentage = 60;
+        break;
+
+        case 12:
+            local_uint8SpeedPercentage = 80;
+        break;
+
+        case 15:
+            local_uint8SpeedPercentage = 100;
+        break;
+    }
+
+    return local_uint8SpeedPercentage;
+}
+
 void APP_voidScheduledControlFunc(void)
 {
     if (global_uint8HasReceivedDataWithinWindow)
@@ -135,7 +165,7 @@ void APP_voidScheduledControlFunc(void)
         } 
 
         /* set motor speed */
-        Motor_SetSpeed(arr_uint8CurrDataFields[SPEED_LVL]);
+        Motor_SetSpeed(APP_uint8MapSpeedLvlToPercentage());
 
         /* light up LED for this action to indicate success */
         HLED_uint8SetLEDValue(HLED_SUCCESSFUL_TRANSACTION, HLED_ON);

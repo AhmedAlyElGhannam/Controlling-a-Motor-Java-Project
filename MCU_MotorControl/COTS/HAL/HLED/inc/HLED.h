@@ -51,9 +51,12 @@ typedef enum
 /* always start LED name from 0x00 */
 typedef enum
 {
-    HLED_START = 0x00,
-    HLED_ALERT = 0x01,
-    HLED_STOP = 0x02,
+    HLED_INVALID_ID = 0x00,
+    HLED_SPEED_REVERSE = 0x01,
+    HLED_TIMEOUT = 0x02,
+    HLED_RECEPTION_SUCCESSFUL = 0x03,
+    HLED_SUCCESSFUL_TRANSACTION = 0x04,
+    NUM_OF_LEDS
 } HLED_enuLEDName_t;
 
 

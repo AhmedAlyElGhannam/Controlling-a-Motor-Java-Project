@@ -14,23 +14,35 @@
 /* array that stores LED configuration and sets it at runtime */
 HLED_structLEDConfig_t Global_HLED_structLEDConfigArr[NUM_OF_LEDS] =
 {
-    [HLED_START] = 
+    [HLED_VALID_ID] = 
     {
-        .portNum = HAL_PORTD,
+        .portNum = HAL_PORTA,
         .pinNum = HAL_PIN0,
         .connection = HLED_FORWARD
-    }
-    /*[HLED_ALERT] = 
+    },
+    [HLED_SPEED_REVERSE] = 
     {
-        .portNum = PORTC,
-        .pinNum = PIN0,
+        .portNum = HAL_PORTA,
+        .pinNum = HAL_PIN1,
         .connection = HLED_FORWARD
     },
-    [HLED_STOP] = 
+    [HLED_TIMEOUT] = 
     {
-        .portNum = PORTB,
-        .pinNum = PIN0,
+        .portNum = HAL_PORTA,
+        .pinNum = HAL_PIN2,
         .connection = HLED_FORWARD
-    }*/
+    },
+    [HLED_RECEPTION_SUCCESSFUL] = 
+    {
+        .portNum = HAL_PORTA,
+        .pinNum = HAL_PIN3,
+        .connection = HLED_FORWARD
+    },
+    [HLED_SUCCESSFUL_TRANSACTION] = 
+    {
+        .portNum = HAL_PORTA,
+        .pinNum = HAL_PIN4,
+        .connection = HLED_FORWARD
+    }
 };
 

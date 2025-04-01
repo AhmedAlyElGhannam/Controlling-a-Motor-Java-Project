@@ -2,14 +2,14 @@
 #include "HSCHEDULER.h"
 #include "HSCHEDULER_LCFG.h"
 
-extern void APP_voidToggleLED(void);
+extern void APP_voidScheduledControlFunc(void);
 
 HSCHEDULER_structRunnable_t HSCHEDULER_structRunnableArr[NUM_OF_RUNNABLES] = 
 {
-    [RUNNABLE_LED] = 
+    [RUNNABLE_MOTOR_CON] = 
     {
-        .period = 1000U,
+        .period = 500U,
         .firstDelay = 0,
-        .cbf = APP_voidToggleLED
+        .cbf = APP_voidScheduledControlFunc
     }
 };
