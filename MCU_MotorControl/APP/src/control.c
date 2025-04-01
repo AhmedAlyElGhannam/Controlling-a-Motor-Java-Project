@@ -3,6 +3,8 @@
 #define ACK_BYTE    0xFF
 #define ID_OFFSET   5
 #define DIR_OFFSET  4
+#define CLOCKWISE   Forward
+#define ANTICLOCKWISE   Backward
 
 typedef enum 
 {   
@@ -13,9 +15,9 @@ typedef enum
     NUM_OF_DATA_FIELDS,
 } APP_enuDataFields_t;
 
-volatile static uint8_t global_uint8ReceivedData = 0xFF;
 volatile static uint8_t global_uint8IsFirstReceivedByte = true;
 volatile static uint8_t global_uint8HasReceivedDataWithinWindow = false;
+volatile static uint8_t global_uint8HasTimedOut = false;
 
 volatile static uint8_t arr_uint8CurrDataFields[NUM_OF_DATA_FIELDS];
 volatile static uint8_t arr_uint8PrevDataFields[NUM_OF_DATA_FIELDS];
@@ -26,6 +28,7 @@ void echoReceivedByte(u8 data)
     arr_uint8CurrDataFields[FULL_DATA_BYTE] =  UART_ReceiveByte();
     UART_SendByte(ACK_BYTE);    
     global_uint8HasReceivedDataWithinWindow = true;  
+    HLED_uint8SetLEDValue(HLED_RECEPTION_SUCCESSFUL, HLED_ON);
 }
 
 
@@ -40,7 +43,9 @@ void APP_voidControlSystemInit(void)
 {
     cli();
 
-    MPORT_voidInit();
+    // MPORT_voidInit();
+
+    HLED_voidInit();
 
     Motor_Init();
 
@@ -77,6 +82,13 @@ void APP_voidScheduledControlFunc(void)
     {
         global_uint8HasReceivedDataWithinWindow = false;
 
+        if (global_uint8HasTimedOut)
+        {
+            HLED_uint8SetLEDValue(HLED_TIMEOUT, HLED_OFF);
+            global_uint8HasTimedOut = false;
+        } 
+        else {}
+
         APP_voidExtractDataFromReceivedByte();
 
         if (global_uint8IsFirstReceivedByte) // first received byte does not require ID check
@@ -84,34 +96,55 @@ void APP_voidScheduledControlFunc(void)
             global_uint8IsFirstReceivedByte = false;
 
             APP_voidCpyDataHistory();
+
+            /* set dir */
+            Motor_SetDirection(arr_uint8CurrDataFields[SPEED_DIR]);
         }
         else  
         {
             /* check if newly received byte ID is different */
             if (arr_uint8CurrDataFields[BYTE_ID] == arr_uint8PrevDataFields[BYTE_ID])
             {
-                /* light up an LED to indicate that this byte has an invalid ID */
+                /* light up an LED to indicate an invalid ID event */
+                HLED_uint8SetLEDValue(HLED_INVALID_ID, HLED_ON);
+
             }
             else /* ID is unique */
             {
                 APP_voidCpyDataHistory();
+                HLED_uint8SetLEDValue(HLED_INVALID_ID, HLED_OFF);
             }
         }
 
         /* check for speed reversal for graceful stop then start in opposite dir */
-        if (arr_uint8CurrDataFields[BYTE_ID] == !arr_uint8PrevDataFields[BYTE_ID])
+        if (arr_uint8CurrDataFields[SPEED_DIR] == !arr_uint8PrevDataFields[SPEED_DIR])
         {
             /* stop motor fully */
+            Motor_Brake();
+
             /* set dir */
+            Motor_SetDirection(arr_uint8CurrDataFields[SPEED_DIR]);
+
             /* light up LED for this action */
+            HLED_uint8SetLEDValue(HLED_SPEED_REVERSE, HLED_ON);
         }
-        else {}
+        else 
+        {
+            /* no need to reset speed */
+            HLED_uint8SetLEDValue(HLED_SPEED_REVERSE, HLED_OFF);
+        } 
 
         /* set motor speed */
+        Motor_SetSpeed(arr_uint8CurrDataFields[SPEED_LVL]);
+
         /* light up LED for this action to indicate success */
+        HLED_uint8SetLEDValue(HLED_SUCCESSFUL_TRANSACTION, HLED_ON);
     }
     else 
     {
         /* light up an LED to indicate timeout event */
+        HLED_uint8SetLEDValue(HLED_TIMEOUT, HLED_ON);
+
+        global_uint8HasTimedOut = true;
     }
 }
