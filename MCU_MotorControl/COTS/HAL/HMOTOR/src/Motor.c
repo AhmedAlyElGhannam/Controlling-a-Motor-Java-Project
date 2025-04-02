@@ -13,8 +13,12 @@ void Motor_Init(void) {
 	MPORT_enuSetPinDirection(MPORT_PIN_B0, MPORT_PORT_PIN_OUTPUT); // DIR pin 1
 	MPORT_enuSetPinDirection(MPORT_PIN_B1, MPORT_PORT_PIN_OUTPUT); // DIR pin 2
 	
+	// set DIO pin values to low
+	MDIO_enuSetPinValue(MDIO_PORTB, MDIO_PIN0, MDIO_PIN_LOW);
+	MDIO_enuSetPinValue(MDIO_PORTB, MDIO_PIN1, MDIO_PIN_LOW);
+
 	// Fast PWM, 8kHz frequency (~64 prescaler @16MHz) (I am operating at 8MHz)
-	Timer0_Init_FastPWM(TIMER0_PRESCALER_64, 0);
+	Timer0_Init_FastPWM(TIMER0_PRESCALER_8, 0);
 	Timer0_SetPWMPolarity(PWM_POLARITY_NON_INVERTED);
 	Timer0_Start();
 }
@@ -24,7 +28,6 @@ void Motor_SetSpeed(u8 speed) {
 	if(speed > 100) speed = 100;
 	Timer0_SetDutyCycle(speed); // Atomic update
 }
-
 
 void Motor_SetDirection(int dir) {
 	if(dir) {

@@ -137,7 +137,6 @@ void APP_voidScheduledControlFunc(void)
             {
                 /* light up an LED to indicate an invalid ID event */
                 HLED_uint8SetLEDValue(HLED_INVALID_ID, HLED_ON);
-
             }
             else /* ID is unique */
             {
@@ -162,6 +161,9 @@ void APP_voidScheduledControlFunc(void)
         {
             /* no need to reset speed */
             HLED_uint8SetLEDValue(HLED_SPEED_REVERSE, HLED_OFF);
+
+            /* set dir */
+            Motor_SetDirection(arr_uint8CurrDataFields[SPEED_DIR]);
         } 
 
         /* set motor speed */

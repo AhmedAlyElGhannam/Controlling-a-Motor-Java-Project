@@ -1,0 +1,2 @@
+/usr/bin/avr-ar qc libHSCHEDULER.a CMakeFiles/HSCHEDULER.dir/src/HSCHEDULER.c.obj CMakeFiles/HSCHEDULER.dir/src/HSCHEDULER_LCFG.c.obj
+/usr/bin/avr-ranlib libHSCHEDULER.a

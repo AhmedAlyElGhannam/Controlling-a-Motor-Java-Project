@@ -1,0 +1,5 @@
+# Hashes of file build rules.
+069911e07cedb632c3531cb17a6aad6b CMakeFiles/convert-elf-to-hex
+ce3e1f85d5593b47675d700691f258fe CMakeFiles/flash
+c2b2f84a89ab5f4fc211c7ad93b760d3 CMakeFiles/launch-avr-simul
+f67c0c26f7677279c84abf26eea1a1b2 CMakeFiles/launch-gdb
