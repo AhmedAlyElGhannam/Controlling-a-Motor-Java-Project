@@ -83,19 +83,19 @@ uint8_t APP_uint8MapSpeedLvlToPercentage(void)
     switch (arr_uint8CurrDataFields[SPEED_LVL])
     {
         case 3:
-            local_uint8SpeedPercentage = 20;
-        break;
-
-        case 6:
-            local_uint8SpeedPercentage = 40;
-        break;
-
-        case 9:
             local_uint8SpeedPercentage = 60;
         break;
 
-        case 12:
+        case 6:
+            local_uint8SpeedPercentage = 70;
+        break;
+
+        case 9:
             local_uint8SpeedPercentage = 80;
+        break;
+
+        case 12:
+            local_uint8SpeedPercentage = 90;
         break;
 
         case 15:

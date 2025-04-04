@@ -1,2 +1,0 @@
-/usr/bin/avr-ar qc libHSWITCH.a CMakeFiles/HSWITCH.dir/src/HSWITCH.c.obj CMakeFiles/HSWITCH.dir/src/HSWITCH_LCFG.c.obj
-/usr/bin/avr-ranlib libHSWITCH.a

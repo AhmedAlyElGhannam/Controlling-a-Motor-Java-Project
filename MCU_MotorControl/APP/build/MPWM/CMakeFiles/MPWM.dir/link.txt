@@ -1,2 +1,0 @@
-/usr/bin/avr-ar qc libMPWM.a CMakeFiles/MPWM.dir/src/TIMER0.c.obj
-/usr/bin/avr-ranlib libMPWM.a

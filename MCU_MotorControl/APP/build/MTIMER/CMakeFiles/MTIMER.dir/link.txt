@@ -1,2 +1,0 @@
-/usr/bin/avr-ar qc libMTIMER.a CMakeFiles/MTIMER.dir/src/MTIMER.c.obj CMakeFiles/MTIMER.dir/src/MTIMER_LCFG.c.obj
-/usr/bin/avr-ranlib libMTIMER.a
