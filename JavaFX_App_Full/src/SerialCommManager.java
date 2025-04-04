@@ -166,9 +166,13 @@ public class SerialCommManager {
 	    // surround statements with a try to make sure lock is released even if an exception happens
 	    try {
 	        // transmitter thread can transmit normally when its time comes
-            waitingForAck = false;
+            	waitingForAck = false;
+            
+            	// lower commFailed flag since ack was received successfully after retry
+            	communicationFailed = false;
+            
 	        // signal to all threads (aka only transmitter thread) that ack has been received
-            ackReceivedCondition.signalAll();
+            	ackReceivedCondition.signalAll();
         } finally {
 	        // critical section exited (lock will always be released regardless of above statements exit state)
             lock.unlock();
@@ -289,6 +293,35 @@ public class SerialCommManager {
 	    // I think this statement is kinda useless but I will leave it here for now
         communicationFailed = false;
     }
+    
+    public boolean manualRetry() {
+    lock.lock();
+    try {
+        communicationFailed = false;
+        waitingForAck = false;
+
+        byte dataByteWithID = (byte) (lastSentByte | ((sentByteID & 0x07) << 5));
+        sentByteID++;
+        sendByteInternal(dataByteWithID);
+        waitingForAck = true;
+
+        long deadline = System.currentTimeMillis() + TX_PERIODICITY;
+        while (waitingForAck) {
+            long remaining = deadline - System.currentTimeMillis();
+            if (remaining <= 0) {
+                handleTimeout();
+                return false;
+            }
+            ackReceivedCondition.await(remaining, TimeUnit.MILLISECONDS);
+        }
+        return true; // ACK received
+    } catch (InterruptedException | IOException ex) {
+        handleFailure();
+        return false;
+    } finally {
+        lock.unlock();
+    }
+}
 
     // method to stop transmission, remove Rx data listener, and close the serial port
     public void close() {
