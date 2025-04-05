@@ -73,8 +73,10 @@ public class App extends Application {
     private Text statusText;
     private int currentState = 0; // 0 : off 1 :On
 
-    // Speed mappings (0-5 maps to these values)
+    
+        // Speed mappings (0-5 maps to these values)
     private final int[] SPEED_MAPPING = {0, 3, 6, 9, 12, 15};
+    private final int RPM_SCALE_FACTOR = 40; // Scale factor to convert to RPM (15 * 40 = 600 RPM)
 
     @Override
     public void start(Stage primaryStage) {
@@ -82,20 +84,18 @@ public class App extends Application {
         
         // Show a dialog for selecting the COM port as soon as the app opens
         Stage portSelectionDialog = createPortSelectionDialog(primaryStage);
-        if(portSelectionDialog == null)return;
-        portSelectionDialog.showAndWait(); // Wait until the user selects a port
+        if(portSelectionDialog == null) return;
+        portSelectionDialog.showAndWait();
 
-        // If no port is selected, exit the application
         if (serialCommManager == null) {
             Platform.exit();
             return;
         }
-        // Create all scenes
+        
         createModeSelectionScene();
         createNormalMotorControlScene();
         createAirConditionerScene();
         
-        // Set the initial scene
         primaryStage.setScene(modeSelectionScene);
         primaryStage.setTitle("Advanced Motor Control System");
         primaryStage.setMinWidth(700);
@@ -382,6 +382,7 @@ public class App extends Application {
                 .barColor(Color.web(ACCENT_COLOR))
                 .needleColor(Color.WHITE)
                 .thresholdColor(Color.web(WARNING_COLOR))
+                .threshold(3)
                 .tickLabelColor(Color.web("#aaaaaa"))
                 .tickMarkColor(Color.BLACK)
                 .tickLabelOrientation(TickLabelOrientation.ORTHOGONAL)
@@ -536,7 +537,9 @@ public class App extends Application {
 
     }
     
-    
+    private int getScaledRPM(int sliderValue) {
+        return SPEED_MAPPING[sliderValue] * RPM_SCALE_FACTOR;
+    }
 
     private void updateMotorSpeed(int sliderValue) {
         if (!motorInitialized) {
@@ -544,14 +547,14 @@ public class App extends Application {
             return;
         }
         
-        this.motorSpeed = SPEED_MAPPING[sliderValue];
+        this.motorSpeed = getScaledRPM(sliderValue);
         motorSpeedLabel.setText(sliderValue + " (" + this.motorSpeed + " RPM)");
         updateMotorDirection();
     }
 
     private void updateACStatus(int sliderValue) {
         int absoluteValue = Math.abs(sliderValue);
-        this.motorSpeed = SPEED_MAPPING[absoluteValue/3];
+        this.motorSpeed = getScaledRPM(absoluteValue);
         
         acSpeedLabel.setText("SPEED: " + absoluteValue + " (" + this.motorSpeed + " RPM)");
 
@@ -568,7 +571,7 @@ public class App extends Application {
             acDirectionLabel.setTextFill(Color.web("#aaaaaa"));
         }
 
-        if (absoluteValue >= 4) {  // High speed warning at level 4 or 5
+        if (absoluteValue >= 4) {
             gauge.setBarColor(Color.web(WARNING_COLOR));
         } else {
             gauge.setBarColor(Color.web(ACCENT_COLOR));
@@ -587,16 +590,14 @@ public class App extends Application {
     }
 
     private byte bridgeValue() {
-        if (!motorInitialized ) return 0;
+        if (!motorInitialized) return 0;
         
         int mappedSpeed;
         boolean isNormalMode = (primaryStage.getScene() == normalMotorControlScene);
         
         if (isNormalMode) {
-            // Normal mode uses direct mapping from slider
             mappedSpeed = SPEED_MAPPING[(int)slider.getValue()];
         } else {
-            // AC mode uses absolute value from slider
             mappedSpeed = SPEED_MAPPING[Math.abs((int)acSlider.getValue())];
         }
 
@@ -606,7 +607,7 @@ public class App extends Application {
         System.out.printf("Mode: %s, Slider: %d, Speed: %d, Dir: %s, Binary: %08d%n",
             isNormalMode ? "NORMAL" : "AC",
             isNormalMode ? (int)slider.getValue() : (int)acSlider.getValue(),
-            mappedSpeed,
+            getScaledRPM(isNormalMode ? (int)slider.getValue() : Math.abs((int)acSlider.getValue())),
             directionBit == 0 ? "CW" : "CCW",
             Integer.parseInt(Integer.toBinaryString(result & 0xFF)));
         
