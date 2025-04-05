@@ -12,6 +12,8 @@ import javafx.scene.paint.Color;
 import com.fazecast.jSerialComm.SerialPort;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -80,6 +82,7 @@ public class App extends Application {
         
         // Show a dialog for selecting the COM port as soon as the app opens
         Stage portSelectionDialog = createPortSelectionDialog(primaryStage);
+        if(portSelectionDialog == null)return;
         portSelectionDialog.showAndWait(); // Wait until the user selects a port
 
         // If no port is selected, exit the application
@@ -131,7 +134,7 @@ public class App extends Application {
         if (availablePorts.length == 0) {
             showError("No serial ports found!");
             Platform.exit();
-            return dialog;
+            return null;
         }
 
         // Enable proceed button only when a port is selected
@@ -175,6 +178,8 @@ public class App extends Application {
     }
     
     private void handleConnectionError(SerialCommManager serialCommManager) {
+        toggleState();
+        primaryStage.setScene(modeSelectionScene);
         motorInitialized = false;
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Connection Lost");
@@ -208,7 +213,6 @@ public class App extends Application {
                         alert.close();
                         // Reinitialize motor and restart transmission
                         initializeMotor();
-                        statusLabel.setText("Status: Reconnected and initialized");
                     } else {
                         alert.setContentText("Retry failed. Please try again.");
                         retryButton.setDisable(false);
@@ -278,15 +282,6 @@ public class App extends Application {
     }
 
     private void createNormalMotorControlScene() {
-        // initButton = new Button("Initialize Motor");
-        // initButton.setStyle("-fx-font-size: 16px; -fx-padding: 10px 20px;");
-        // initButton.setOnAction(e -> initializeMotor());
-        
-        // statusLabel = new Label("Status: Motor not initialized");
-        // statusLabel.setStyle("-fx-text-fill: " + TEXT_COLOR + ";");
-
-        // VBox initBox = new VBox(20, initButton, statusLabel);
-        // initBox.setAlignment(Pos.TOP_CENTER);
 
         // Direction controls
         ToggleGroup directionGroup = new ToggleGroup();
@@ -491,8 +486,16 @@ public class App extends Application {
             backButton.getStyle() + 
             "-fx-background-color: transparent;"
         ));
-        backButton.setOnAction(e -> ((Stage) backButton.getScene().getWindow()).setScene(targetScene));
-        
+        backButton.setOnAction(new EventHandler<ActionEvent>() {
+            
+            @Override
+            public void handle(ActionEvent e) {
+                slider.setValue(0);
+                acSlider.setValue(0);
+                Stage currentStage = (Stage) backButton.getScene().getWindow();
+                currentStage.setScene(targetScene);
+            }
+        });        
         return backButton;
     }
 
