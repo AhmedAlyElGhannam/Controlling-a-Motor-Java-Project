@@ -204,7 +204,7 @@ public class App extends Application {
         alert.showAndWait();
     }
     
-    private void showCommunicationErrorDialog(SerialCommManager serialCommManager) {
+private void showCommunicationErrorDialog(SerialCommManager serialCommManager) {
     if (currentErrorDialog != null && currentErrorDialog.isShowing()) {
         return;
     }
@@ -215,25 +215,8 @@ public class App extends Application {
 
     Label messageLabel = new Label("Communication failed or timed out. Please retry or close the application.");
     Button retryButton = new Button("Retry");
-    Button reconnectButton = new Button("Reconnect"); // New button
     Button closeButton = new Button("Close App");
 
-    // Reconnect Button Logic
-    reconnectButton.setOnAction(e -> {
-    // Close all resources
-    resetAppState();
-    
-    Platform.runLater(() -> {
-        // Reinitialize with existing primary stage
-        primaryStage.close(); // Close old UI
-        Stage newPrimaryStage = new Stage();
-        start(newPrimaryStage); // Restart cleanly
-    });
-    
-    currentErrorDialog.close();
-});
-
-    // Retry Button Logic (existing code)
     retryButton.setOnAction(e -> {
         retryButton.setDisable(true);
         messageLabel.setText("Retrying...");
@@ -250,14 +233,12 @@ public class App extends Application {
         }).start();
     });
 
-    // Close Button Logic (existing code)
     closeButton.setOnAction(e -> {
         serialCommManager.close();
         Platform.exit();
     });
 
-    // Add the new button to the layout
-    VBox layout = new VBox(10, messageLabel, retryButton, reconnectButton, closeButton);
+    VBox layout = new VBox(10, messageLabel, retryButton, closeButton);
     layout.setAlignment(Pos.CENTER);
     layout.setStyle("-fx-padding: 20px;");
 
