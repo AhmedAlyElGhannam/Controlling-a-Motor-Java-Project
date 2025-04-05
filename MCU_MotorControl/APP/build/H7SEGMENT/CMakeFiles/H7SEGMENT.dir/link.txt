@@ -1,0 +1,2 @@
+/usr/bin/avr-ar qc libH7SEGMENT.a CMakeFiles/H7SEGMENT.dir/src/H7SEGMENT.c.obj CMakeFiles/H7SEGMENT.dir/src/H7SEGMENT_LCFG.c.obj
+/usr/bin/avr-ranlib libH7SEGMENT.a

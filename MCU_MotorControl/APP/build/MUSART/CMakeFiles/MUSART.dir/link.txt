@@ -1,0 +1,2 @@
+/usr/bin/avr-ar qc libMUSART.a CMakeFiles/MUSART.dir/src/usart.c.obj
+/usr/bin/avr-ranlib libMUSART.a

@@ -603,7 +603,7 @@ private void createAirConditionerScene() {
     }
 
     private byte bridgeValue() {
-        if (!motorInitialized || !isOn) return 0;
+        if (!motorInitialized ) return 0;
         
         int mappedSpeed;
         boolean isNormalMode = (primaryStage.getScene() == normalMotorControlScene);

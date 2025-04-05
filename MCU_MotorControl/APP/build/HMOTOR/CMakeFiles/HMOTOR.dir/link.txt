@@ -1,0 +1,2 @@
+/usr/bin/avr-ar qc libHMOTOR.a CMakeFiles/HMOTOR.dir/src/Motor.c.obj
+/usr/bin/avr-ranlib libHMOTOR.a

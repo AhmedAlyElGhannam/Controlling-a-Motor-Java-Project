@@ -1,0 +1,2 @@
+/usr/bin/avr-ar qc libMGIE.a CMakeFiles/MGIE.dir/src/MGIE.c.obj
+/usr/bin/avr-ranlib libMGIE.a
