@@ -57,8 +57,8 @@ public class App extends Application {
     private Slider slider;
     private RadioButton clockwiseBtn;
     private RadioButton counterClockwiseBtn;
-    private Button initButton;
-    
+    Button normalModeBtn;
+    Button acModeBtn;
     // AC mode fields 
     private Gauge gauge;
     private Slider acSlider;
@@ -69,7 +69,7 @@ public class App extends Application {
     private Circle toggleKnob;
     private Rectangle toggleBackground;
     private Text statusText;
-    private boolean isOn = false;
+    private int currentState = 0; // 0 : off 1 :On
 
     // Speed mappings (0-5 maps to these values)
     private final int[] SPEED_MAPPING = {0, 3, 6, 9, 12, 15};
@@ -175,7 +175,6 @@ public class App extends Application {
     }
     
     private void handleConnectionError(SerialCommManager serialCommManager) {
-        initButton.setDisable(false);
         motorInitialized = false;
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Connection Lost");
@@ -239,15 +238,38 @@ public class App extends Application {
         Label subtitleLabel = new Label("Select Operation Mode");
         subtitleLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: " + TEXT_COLOR + ";");
 
-        // Modern card-style buttons
-        Button normalModeBtn = createModeButton("NORMAL MODE", "#4CAF50");
-        normalModeBtn.setOnAction(e -> primaryStage.setScene(normalMotorControlScene));
-        
-        Button acModeBtn = createModeButton("AIR CONDITIONER MODE", "#2196F3");
-        acModeBtn.setOnAction(e -> primaryStage.setScene(airConditionerScene));
+                // Toggle switch
+        toggleBackground = new Rectangle(120, 50, Color.RED.darker());
+        toggleBackground.setArcHeight(50);
+        toggleBackground.setArcWidth(50);
+        toggleBackground.setStroke(Color.BLACK);
 
+        toggleKnob = new Circle(20, Color.WHITE);
+        toggleKnob.setStroke(Color.DARKGRAY);
+        toggleKnob.setTranslateX(-30); // Start at OFF position (left side)
+
+        // status text for toggle switch
+        statusText = new Text("OFF");
+        statusText.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+        statusText.setFill(Color.WHITE);
+        statusText.setTranslateX(15); // Position text on the right side
+
+        StackPane toggleContainer = new StackPane(toggleBackground, toggleKnob, statusText);
+        toggleContainer.setAlignment(Pos.CENTER);
+        toggleContainer.setPrefSize(120, 50);
+        toggleContainer.setOnMouseClicked(e -> toggleState());
+        // Create a container for the toggle to position it above the gauge
+        // Modern card-style buttons
+
+        normalModeBtn = createModeButton("NORMAL MODE", "#4CAF50");
+        normalModeBtn.setOnAction(e -> primaryStage.setScene(normalMotorControlScene));
+
+        acModeBtn = createModeButton("AIR CONDITIONER MODE", "#2196F3");
+        acModeBtn.setOnAction(e -> primaryStage.setScene(airConditionerScene));
+        normalModeBtn.setDisable(true);
+        acModeBtn.setDisable(true);
         // Layout with improved spacing and background
-        VBox modeSelectionLayout = new VBox(30, titleLabel, subtitleLabel, normalModeBtn, acModeBtn);
+        VBox modeSelectionLayout = new VBox(30, titleLabel, subtitleLabel,toggleContainer, normalModeBtn, acModeBtn);
         modeSelectionLayout.setAlignment(Pos.CENTER);
         modeSelectionLayout.setPadding(new Insets(40));
         modeSelectionLayout.setStyle("-fx-background-color: " + PRIMARY_COLOR + ";");
@@ -256,22 +278,22 @@ public class App extends Application {
     }
 
     private void createNormalMotorControlScene() {
-        initButton = new Button("Initialize Motor");
-        initButton.setStyle("-fx-font-size: 16px; -fx-padding: 10px 20px;");
-        initButton.setOnAction(e -> initializeMotor());
+        // initButton = new Button("Initialize Motor");
+        // initButton.setStyle("-fx-font-size: 16px; -fx-padding: 10px 20px;");
+        // initButton.setOnAction(e -> initializeMotor());
         
-        statusLabel = new Label("Status: Motor not initialized");
-        statusLabel.setStyle("-fx-text-fill: " + TEXT_COLOR + ";");
+        // statusLabel = new Label("Status: Motor not initialized");
+        // statusLabel.setStyle("-fx-text-fill: " + TEXT_COLOR + ";");
 
-        VBox initBox = new VBox(20, initButton, statusLabel);
-        initBox.setAlignment(Pos.TOP_CENTER);
+        // VBox initBox = new VBox(20, initButton, statusLabel);
+        // initBox.setAlignment(Pos.TOP_CENTER);
 
         // Direction controls
         ToggleGroup directionGroup = new ToggleGroup();
         clockwiseBtn = new RadioButton("Clockwise");
         clockwiseBtn.setToggleGroup(directionGroup);
         clockwiseBtn.setSelected(true);
-        clockwiseBtn.setDisable(true);
+        // clockwiseBtn.setDisable(true);
         clockwiseBtn.setStyle("-fx-text-fill: " + TEXT_COLOR + ";");
         clockwiseBtn.setOnAction(e -> {
             clockwiseDirection = true;
@@ -281,7 +303,7 @@ public class App extends Application {
         
         counterClockwiseBtn = new RadioButton("Counter-Clockwise");
         counterClockwiseBtn.setToggleGroup(directionGroup);
-        counterClockwiseBtn.setDisable(true);
+        // counterClockwiseBtn.setDisable(true);
         counterClockwiseBtn.setStyle("-fx-text-fill: " + TEXT_COLOR + ";");
         counterClockwiseBtn.setOnAction(e -> {
             clockwiseDirection = false;
@@ -305,7 +327,7 @@ public class App extends Application {
         slider.setMajorTickUnit(1);
         slider.setMinorTickCount(0);
         slider.setBlockIncrement(1);
-        slider.setDisable(true);
+        // slider.setDisable(true);
         slider.setSnapToTicks(true);
         
         motorSpeedLabel = new Label("0 (0 RPM)");
@@ -344,105 +366,85 @@ public class App extends Application {
 
         Button backButton = createBackButton(modeSelectionScene);
 
-        VBox root = new VBox(40, initBox, motorControlBox, backButton);
+        VBox root = new VBox(40, motorControlBox, backButton);
         root.setAlignment(Pos.CENTER);
         root.setStyle("-fx-background-color: " + PRIMARY_COLOR + ";");
 
         normalMotorControlScene = new Scene(root, 800, 800);
     }
 
-private void createAirConditionerScene() {
-    // Create the gauge with -5 to 5 range
-    gauge = GaugeBuilder.create()
-            .prefSize(550, 550)
-            .title("AIR CONDITIONER MODE")
-            .unit("Level")
-            .minValue(-5)
-            .maxValue(5)
-            .decimals(0)
-            .valueColor(Color.WHITE)
-            .titleColor(Color.web(ACCENT_COLOR))
-            .barColor(Color.web(ACCENT_COLOR))
-            .needleColor(Color.WHITE)
-            .thresholdColor(Color.web(WARNING_COLOR))
-            .tickLabelColor(Color.web("#aaaaaa"))
-            .tickMarkColor(Color.BLACK)
-            .tickLabelOrientation(TickLabelOrientation.ORTHOGONAL)
-            .build();
-    gauge.setSkin(new ModernSkin(gauge));
-    
-    
-    
-    // AC mode slider (-5 to 5)
-    acSlider = new Slider(-5, 5, 0);
-    acSlider.setPrefWidth(550);
-    acSlider.setStyle(
-        "-fx-control-inner-background: #444444; " +
-        "-fx-padding: 20px; " +
-        "-fx-font-size: 16px;"
-    );
-    acSlider.setMajorTickUnit(1);
-    acSlider.setMinorTickCount(0);
-    acSlider.setBlockIncrement(1);
-    acSlider.setSnapToTicks(true);
-    acSlider.setDisable(true);
-    acSpeedLabel = new Label("SPEED: 0 (0 RPM)");
-    acSpeedLabel.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: " + TEXT_COLOR + ";");
-    
-    acDirectionLabel = new Label("DIRECTION: STOPPED");
-    acDirectionLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #aaaaaa;");
+    private void createAirConditionerScene() {
+        // Create the gauge with -5 to 5 range
+        gauge = GaugeBuilder.create()
+                .prefSize(550, 550)
+                .title("AIR CONDITIONER MODE")
+                .unit("Level")
+                .minValue(-5)
+                .maxValue(5)
+                .decimals(0)
+                .valueColor(Color.WHITE)
+                .titleColor(Color.web(ACCENT_COLOR))
+                .barColor(Color.web(ACCENT_COLOR))
+                .needleColor(Color.WHITE)
+                .thresholdColor(Color.web(WARNING_COLOR))
+                .tickLabelColor(Color.web("#aaaaaa"))
+                .tickMarkColor(Color.BLACK)
+                .tickLabelOrientation(TickLabelOrientation.ORTHOGONAL)
+                .build();
+        gauge.setSkin(new ModernSkin(gauge));
+        
+        
+        
+        // AC mode slider (-5 to 5)
+        acSlider = new Slider(-5, 5, 0);
+        acSlider.setPrefWidth(550);
+        acSlider.setStyle(
+            "-fx-control-inner-background: #444444; " +
+            "-fx-padding: 20px; " +
+            "-fx-font-size: 16px;"
+        );
+        acSlider.setMajorTickUnit(1);
+        acSlider.setMinorTickCount(0);
+        acSlider.setBlockIncrement(1);
+        acSlider.setSnapToTicks(true);
+        // acSlider.setDisable(true);
+        acSpeedLabel = new Label("SPEED: 0 (0 RPM)");
+        acSpeedLabel.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: " + TEXT_COLOR + ";");
+        
+        acDirectionLabel = new Label("DIRECTION: STOPPED");
+        acDirectionLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #aaaaaa;");
 
-    acSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-        int discreteValue = newVal.intValue();
-        if (!acSlider.isValueChanging()) {
-            updateACStatus(discreteValue);
-            serialCommManager.setLastSentByte(bridgeValue());
-        }
-    });
+        acSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            int discreteValue = newVal.intValue();
+            if (!acSlider.isValueChanging()) {
+                updateACStatus(discreteValue);
+                serialCommManager.setLastSentByte(bridgeValue());
+            }
+        });
 
-    gauge.valueProperty().bindBidirectional(acSlider.valueProperty());
-// Toggle switch
-    toggleBackground = new Rectangle(120, 50, Color.RED.darker());
-    toggleBackground.setArcHeight(50);
-    toggleBackground.setArcWidth(50);
-    toggleBackground.setStroke(Color.BLACK);
+        gauge.valueProperty().bindBidirectional(acSlider.valueProperty());
 
-    toggleKnob = new Circle(20, Color.WHITE);
-    toggleKnob.setStroke(Color.DARKGRAY);
-    toggleKnob.setTranslateX(-30); // Start at OFF position (left side)
+        VBox gaugeToggleContainer = new VBox(10, gauge);
+        gaugeToggleContainer.setAlignment(Pos.CENTER);
 
-    // status text for toggle switch
-    statusText = new Text("OFF");
-    statusText.setFont(Font.font("Arial", FontWeight.BOLD, 16));
-    statusText.setFill(Color.WHITE);
-    statusText.setTranslateX(15); // Position text on the right side
+        VBox controlPanel = new VBox(30, gaugeToggleContainer, acSlider, acSpeedLabel, acDirectionLabel);
+        controlPanel.setAlignment(Pos.CENTER);
+        controlPanel.setPadding(new Insets(30));
+        controlPanel.setStyle(
+            "-fx-background-color: " + SECONDARY_COLOR + "; " +
+            "-fx-background-radius: 20px; " +
+            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 15, 0, 0, 0);"
+        );
 
-    StackPane toggleContainer = new StackPane(toggleBackground, toggleKnob, statusText);
-    toggleContainer.setAlignment(Pos.CENTER);
-    toggleContainer.setPrefSize(120, 50);
-    toggleContainer.setOnMouseClicked(e -> toggleState());
-    // Create a container for the toggle to position it above the gauge
-    VBox gaugeToggleContainer = new VBox(10, toggleContainer, gauge);
-    gaugeToggleContainer.setAlignment(Pos.CENTER);
+        Button backButton = createBackButton(modeSelectionScene);
 
-    VBox controlPanel = new VBox(30, gaugeToggleContainer, acSlider, acSpeedLabel, acDirectionLabel);
-    controlPanel.setAlignment(Pos.CENTER);
-    controlPanel.setPadding(new Insets(30));
-    controlPanel.setStyle(
-        "-fx-background-color: " + SECONDARY_COLOR + "; " +
-        "-fx-background-radius: 20px; " +
-        "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 15, 0, 0, 0);"
-    );
+        VBox root = new VBox(40, controlPanel, backButton);
+        root.setAlignment(Pos.CENTER);
+        root.setPadding(new Insets(40));
+        root.setStyle("-fx-background-color: " + PRIMARY_COLOR + ";");
 
-    Button backButton = createBackButton(modeSelectionScene);
-
-    VBox root = new VBox(40, controlPanel, backButton);
-    root.setAlignment(Pos.CENTER);
-    root.setPadding(new Insets(40));
-    root.setStyle("-fx-background-color: " + PRIMARY_COLOR + ";");
-
-    airConditionerScene = new Scene(root, 800, 900);
-}
+        airConditionerScene = new Scene(root, 800, 900);
+    }
 
     private Button createModeButton(String text, String baseColor) {
         Button button = new Button(text);
@@ -496,64 +498,43 @@ private void createAirConditionerScene() {
 
     private void initializeMotor() {
         if (motorInitialized) {
-            initButton.setDisable(true);
-            statusLabel.setText("Status: Motor already initialized");
-        }else{
-        
-            statusLabel.setText("Status: Initializing motor...");
-            initButton.setDisable(true);
-            motorInitialized = true;
-
-            slider.setDisable(false);
-            clockwiseBtn.setDisable(false);
-            counterClockwiseBtn.setDisable(false);
-
-            slider.setValue(0); 
-            clockwiseBtn.setSelected(true); 
-
-            serialCommManager.startPeriodicTransmission(() -> {
-                Platform.runLater(() -> handleConnectionError(serialCommManager));
+                serialCommManager.startPeriodicTransmission(() -> {
+                    Platform.runLater(() -> handleConnectionError(serialCommManager));
             });
         }
     }
         
     private void toggleState() {
-        isOn = !isOn;
-        animateToggle();
-        updateToggleUI();
-        updateControlState();
-    }
-    
-    private void animateToggle() {
+        // toggle the initialize motor button state 
+        currentState ^= 1;
+        // animate the initialization button toggle
         TranslateTransition transition = new TranslateTransition(Duration.millis(200), toggleKnob);
-        transition.setToX(isOn ? 30 : -30); 
-        transition.play();
-    }
-
-    private void updateToggleUI() {
-        if (isOn) {
+        transition.setToX(currentState==1 ? 30 : -30); 
+        transition.play();        
+        if (currentState == 1) { // motor ON
+            motorInitialized = true;
             toggleBackground.setFill(Color.GREEN.darker());
-            
-            
             statusText.setText("ON");
             statusText.setTranslateX(-15);
-        } else {
+            normalModeBtn.setDisable(false);
+            acModeBtn.setDisable(false);
+
+            initializeMotor();
+        } else { // motor Off
+            // motorInitialized = false;
             toggleBackground.setFill(Color.RED.darker());
             statusText.setText("OFF");
             statusText.setTranslateX(15);
+            normalModeBtn.setDisable(true);
+            acModeBtn.setDisable(true);
+            serialCommManager.setLastSentByte((byte)0x00);
+
         }
+
     }
     
-    private void updateControlState() {
-        
-        acSlider.setDisable(!isOn);
-        if (isOn) {
-            acSlider.setValue(0);
-            updateACStatus(0);
-            initializeMotor();
-        }
-    }
     
+
     private void updateMotorSpeed(int sliderValue) {
         if (!motorInitialized) {
             statusLabel.setText("Status: Please initialize motor first");
@@ -567,7 +548,7 @@ private void createAirConditionerScene() {
 
     private void updateACStatus(int sliderValue) {
         int absoluteValue = Math.abs(sliderValue);
-        this.motorSpeed = SPEED_MAPPING[absoluteValue];
+        this.motorSpeed = SPEED_MAPPING[absoluteValue/3];
         
         acSpeedLabel.setText("SPEED: " + absoluteValue + " (" + this.motorSpeed + " RPM)");
 
