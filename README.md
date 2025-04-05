@@ -7,8 +7,8 @@
 - [x] TextField for speed + dir. **R**
 - [x] App integration with SerialCommManager. **A** 
 - <s>[ ] TextField for acknowledgement. **R**</s>
-- [ ] EXTRA: GUI for Air Conditioner
-- [ ] EXTRA: Handlers for Knob + Toggle Switch
+- [x] EXTRA: GUI for Air Conditioner
+- [x] EXTRA: Handlers for Knob + Toggle Switch
 
 # Tasks --- MCU Motor Control:
 - [x] USART Driver. **O**
