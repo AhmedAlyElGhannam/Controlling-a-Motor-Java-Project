@@ -6,7 +6,7 @@
 - [x] Slider handler for required scene. **O**
 - [x] TextField for speed + dir. **R**
 - [x] App integration with SerialCommManager. **A** 
-- [ ] TextField for acknowledgement. **R**
+- <s>[ ] TextField for acknowledgement. **R**</s>
 - [ ] EXTRA: GUI for Air Conditioner
 - [ ] EXTRA: Handlers for Knob + Toggle Switch
 
