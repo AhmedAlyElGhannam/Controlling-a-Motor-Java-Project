@@ -4,20 +4,33 @@ import eu.hansolo.medusa.Gauge;
 import eu.hansolo.medusa.GaugeBuilder;
 import eu.hansolo.medusa.TickLabelOrientation;
 import eu.hansolo.medusa.skins.ModernSkin;
-import javafx.application.Application;
-import javafx.application.Platform;
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.RadioButton;
-import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import com.fazecast.jSerialComm.SerialPort;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.scene.control.Button;
+import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.util.Duration;
 
 public class App extends Application {
     // Color theme
@@ -41,7 +54,6 @@ public class App extends Application {
     private Label motorDirectionLabel;
     private Label statusLabel;
     private String motorDirection = "MOTOR STOPPED";
-    private static int frameCounter = 0;
     private boolean motorInitialized = false;
     private boolean clockwiseDirection = true;
     private Slider slider;
@@ -54,6 +66,12 @@ public class App extends Application {
     private Slider acSlider;
     private Label acSpeedLabel;
     private Label acDirectionLabel;
+    
+    // Toggle switch components
+    private Circle toggleKnob;
+    private Rectangle toggleBackground;
+    private Text statusText;
+    private boolean isOn = false;
 
     // Speed mappings (0-5 maps to these values)
     private final int[] SPEED_MAPPING = {0, 3, 6, 9, 12, 15};
@@ -62,6 +80,15 @@ public class App extends Application {
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
         
+        // Show a dialog for selecting the COM port as soon as the app opens
+        Stage portSelectionDialog = createPortSelectionDialog(primaryStage);
+        portSelectionDialog.showAndWait(); // Wait until the user selects a port
+
+        // If no port is selected, exit the application
+        if (serialCommManager == null) {
+            Platform.exit();
+            return;
+        }
         // Create all scenes
         createModeSelectionScene();
         createNormalMotorControlScene();
@@ -79,42 +106,132 @@ public class App extends Application {
             }
             Platform.exit();
         });
-
         primaryStage.show();
     }
-//    private void handleConnectionError() {
-//    // Create an ERROR alert
-//    Alert alert = new Alert(AlertType.ERROR);
-//    alert.setTitle("Connection Lost");
-//    alert.setHeaderText("Failed to connect to the motor controller!");
-//    alert.setContentText("Check if the device is properly connected.");
-//
-//    // Custom buttons
-//    ButtonType retryButton = new ButtonType("Retry");
-//    ButtonType exitButton = new ButtonType("Exit to Main Menu");
-//
-//    // Remove default OK button and add custom ones
-//    alert.getButtonTypes().setAll(retryButton, exitButton);
-//
-//    // Show the alert and wait for user response
-//    alert.showAndWait().ifPresent(response -> {
-//        if (response == retryButton) {
-//            // Attempt to reconnect
-////            boolean retrySuccess = ;
-//            if () {
-//                // If retry fails, show the SAME alert again
-//                handleConnectionError(); // Recursive call
-//            } else {
-//                // Success: close alert and continue
-//                alert.close();
-//            }
-//        } else if (response == exitButton) {
-//            // Return to the main menu scene
-//            primaryStage.setScene(modeSelectionScene);
-//            alert.close();
-//        }
-//    });
-//}
+    
+    private Stage createPortSelectionDialog(Stage primaryStage) {
+        Stage dialog = new Stage();
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.initOwner(primaryStage);
+
+        // ComboBox for selecting COM port
+        ComboBox<String> portSelector = new ComboBox<>();
+        portSelector.setPromptText("Select COM port");
+        Button proceedButton = new Button("Proceed");
+        proceedButton.setDisable(true);
+
+        // Label with the instruction text
+        Label instructionLabel = new Label("Select a Serial Port and Click Proceed");
+
+        // Get all available serial ports using jSerialComm
+        SerialPort[] availablePorts = SerialPort.getCommPorts();
+        for (SerialPort port : availablePorts) {
+            portSelector.getItems().add(port.getSystemPortName());
+        }
+
+        // If no ports are available, show an error and exit
+        if (availablePorts.length == 0) {
+            showError("No serial ports found!");
+            Platform.exit();
+            return dialog;
+        }
+
+        // Enable proceed button only when a port is selected
+        portSelector.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            proceedButton.setDisable(newVal == null);
+        });
+
+        // Default to the first available port
+        portSelector.getSelectionModel().select(0);
+
+        // Proceed button action handler
+        proceedButton.setOnAction(e -> {
+            String portName = portSelector.getSelectionModel().getSelectedItem();
+            if (portName == null) return;
+
+            serialCommManager = new SerialCommManager(portName, (byte) 0x00);
+            if (!serialCommManager.openPort()) {
+                showError("Failed to open port!");
+            } else {
+                dialog.close();
+            }
+        });
+
+        // Initialize dialog UI
+        VBox dialogVBox = new VBox(10, instructionLabel, portSelector, proceedButton);
+        dialogVBox.setAlignment(Pos.CENTER);
+        dialogVBox.setStyle("-fx-padding: 20px;");
+        Scene dialogScene = new Scene(dialogVBox, 300, 150);
+        dialog.setScene(dialogScene);
+        dialog.setTitle("Select COM Port");
+
+        return dialog;
+    }
+    
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+    
+    private void handleConnectionError(SerialCommManager serialCommManager) {
+        initButton.setDisable(false);
+        motorInitialized = false;
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Connection Lost");
+        alert.setHeaderText("Failed to connect to the motor controller!");
+        alert.setContentText("Check if the device is properly connected.");
+
+        ButtonType retryButtonType = new ButtonType("Retry");
+        ButtonType exitButtonType = new ButtonType("Exit");
+        alert.getButtonTypes().setAll(retryButtonType, exitButtonType);
+
+        // Get button references
+        Button retryButton = (Button) alert.getDialogPane().lookupButton(retryButtonType);
+        Button exitButton = (Button) alert.getDialogPane().lookupButton(exitButtonType);
+
+        // Get the Stage (window) of the Alert
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+
+        // Handle X button press - treat same as Retry
+        stage.setOnCloseRequest(e -> {
+            e.consume(); // Prevent default close behavior
+            retryButton.fire(); // Trigger retry action
+        });
+
+        retryButton.setOnAction(e -> {
+            retryButton.setDisable(true);
+            alert.setContentText("Retrying...");
+            new Thread(() -> {
+                boolean success = serialCommManager.manualRetry();
+                Platform.runLater(() -> {
+                    if (success) {
+                        alert.close();
+                        // Reinitialize motor and restart transmission
+                        initializeMotor();
+                        statusLabel.setText("Status: Reconnected and initialized");
+                    } else {
+                        alert.setContentText("Retry failed. Please try again.");
+                        retryButton.setDisable(false);
+                    }
+                });
+            }).start();
+        });
+
+        exitButton.setOnAction(e -> {
+            serialCommManager.close();
+            Platform.exit();
+        });
+
+        alert.showAndWait().ifPresent(response -> {
+            if (response == exitButtonType) {
+                serialCommManager.close();
+                Platform.exit();
+            }
+        });
+    }
 
     private void createModeSelectionScene() {
         // Main title with gradient effect
@@ -161,7 +278,7 @@ public class App extends Application {
         clockwiseBtn.setOnAction(e -> {
             clockwiseDirection = true;
             updateMotorDirection();
-            bridgeValue();
+            serialCommManager.setLastSentByte(bridgeValue());
         });
         
         counterClockwiseBtn = new RadioButton("Counter-Clockwise");
@@ -171,7 +288,7 @@ public class App extends Application {
         counterClockwiseBtn.setOnAction(e -> {
             clockwiseDirection = false;
             updateMotorDirection();
-            bridgeValue();
+            serialCommManager.setLastSentByte(bridgeValue());
         });
         
         HBox directionBox = new HBox(20, clockwiseBtn, counterClockwiseBtn);
@@ -211,12 +328,14 @@ public class App extends Application {
             int discreteValue = newVal.intValue();
             if (!slider.isValueChanging()) {
                 updateMotorSpeed(discreteValue);
-                bridgeValue();
+                serialCommManager.setLastSentByte(bridgeValue());
             }
         });
 
         VBox motorControlBox = new VBox(20, directionBox, slider, motorSpeedLabel, motorDirectionLabel);
         motorControlBox.setAlignment(Pos.CENTER);
+        
+        
         motorControlBox.setStyle(
             "-fx-background-color: " + SECONDARY_COLOR + "; " +
             "-fx-background-radius: 20px; " +
@@ -234,73 +353,98 @@ public class App extends Application {
         normalMotorControlScene = new Scene(root, 800, 800);
     }
 
-        private void createAirConditionerScene() {
-        // Create the gauge with -5 to 5 range
-        gauge = GaugeBuilder.create()
-                .prefSize(550, 550)
-                .title("AIR CONDITIONER MODE")
-                .unit("Level")
-                .minValue(-5)
-                .maxValue(5)
-                .decimals(0)
-                .valueColor(Color.WHITE)
-                .titleColor(Color.web(ACCENT_COLOR))
-                .barColor(Color.web(ACCENT_COLOR))
-                .needleColor(Color.WHITE)
-                .thresholdColor(Color.web(WARNING_COLOR))
-                .tickLabelColor(Color.web("#aaaaaa"))
-                .tickMarkColor(Color.BLACK)
-                .tickLabelOrientation(TickLabelOrientation.ORTHOGONAL)
-                .build();
-        gauge.setSkin(new ModernSkin(gauge));
+private void createAirConditionerScene() {
+    // Create the gauge with -5 to 5 range
+    gauge = GaugeBuilder.create()
+            .prefSize(550, 550)
+            .title("AIR CONDITIONER MODE")
+            .unit("Level")
+            .minValue(-5)
+            .maxValue(5)
+            .decimals(0)
+            .valueColor(Color.WHITE)
+            .titleColor(Color.web(ACCENT_COLOR))
+            .barColor(Color.web(ACCENT_COLOR))
+            .needleColor(Color.WHITE)
+            .thresholdColor(Color.web(WARNING_COLOR))
+            .tickLabelColor(Color.web("#aaaaaa"))
+            .tickMarkColor(Color.BLACK)
+            .tickLabelOrientation(TickLabelOrientation.ORTHOGONAL)
+            .build();
+    gauge.setSkin(new ModernSkin(gauge));
+    
+    
+    
+    // AC mode slider (-5 to 5)
+    acSlider = new Slider(-5, 5, 0);
+    acSlider.setPrefWidth(550);
+    acSlider.setStyle(
+        "-fx-control-inner-background: #444444; " +
+        "-fx-padding: 20px; " +
+        "-fx-font-size: 16px;"
+    );
+    acSlider.setMajorTickUnit(1);
+    acSlider.setMinorTickCount(0);
+    acSlider.setBlockIncrement(1);
+    acSlider.setSnapToTicks(true);
+    acSlider.setDisable(true);
+    acSpeedLabel = new Label("SPEED: 0 (0 RPM)");
+    acSpeedLabel.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: " + TEXT_COLOR + ";");
+    
+    acDirectionLabel = new Label("DIRECTION: STOPPED");
+    acDirectionLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #aaaaaa;");
 
-        // AC mode slider (-5 to 5)
-        acSlider = new Slider(-5, 5, 0);
-        acSlider.setPrefWidth(550);
-        acSlider.setStyle(
-            "-fx-control-inner-background: #444444; " +
-            "-fx-padding: 20px; " +
-            "-fx-font-size: 16px;"
-        );
-        acSlider.setMajorTickUnit(1);
-        acSlider.setMinorTickCount(0);
-        acSlider.setBlockIncrement(1);
-        acSlider.setSnapToTicks(true);
+    acSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+        int discreteValue = newVal.intValue();
+        if (!acSlider.isValueChanging()) {
+            updateACStatus(discreteValue);
+            serialCommManager.setLastSentByte(bridgeValue());
+        }
+    });
 
-        acSpeedLabel = new Label("SPEED: 0 (0 RPM)");
-        acSpeedLabel.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: " + TEXT_COLOR + ";");
-        
-        acDirectionLabel = new Label("DIRECTION: STOPPED");
-        acDirectionLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #aaaaaa;");
+    gauge.valueProperty().bindBidirectional(acSlider.valueProperty());
+// Toggle switch
+    toggleBackground = new Rectangle(120, 50, Color.RED.darker());
+    toggleBackground.setArcHeight(50);
+    toggleBackground.setArcWidth(50);
+    toggleBackground.setStroke(Color.BLACK);
 
-        acSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-            int discreteValue = newVal.intValue();
-            if (!acSlider.isValueChanging()) {
-                updateACStatus(discreteValue);
-                bridgeValue(); 
-            }
-        });
+    toggleKnob = new Circle(20, Color.WHITE);
+    toggleKnob.setStroke(Color.DARKGRAY);
+    toggleKnob.setTranslateX(-30); // Start at OFF position (left side)
 
-        gauge.valueProperty().bindBidirectional(acSlider.valueProperty());
+    // status text for toggle switch
+    statusText = new Text("OFF");
+    statusText.setFont(Font.font("Arial", FontWeight.BOLD, 16));
+    statusText.setFill(Color.WHITE);
+    statusText.setTranslateX(15); // Position text on the right side
 
-        VBox controlPanel = new VBox(30, gauge, acSlider, acSpeedLabel, acDirectionLabel);
-        controlPanel.setAlignment(Pos.CENTER);
-        controlPanel.setPadding(new Insets(30));
-        controlPanel.setStyle(
-            "-fx-background-color: " + SECONDARY_COLOR + "; " +
-            "-fx-background-radius: 20px; " +
-            "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 15, 0, 0, 0);"
-        );
+    StackPane toggleContainer = new StackPane(toggleBackground, toggleKnob, statusText);
+    toggleContainer.setAlignment(Pos.CENTER);
+    toggleContainer.setPrefSize(120, 50);
+    toggleContainer.setOnMouseClicked(e -> toggleState());
+    // Create a container for the toggle to position it above the gauge
+    VBox gaugeToggleContainer = new VBox(10, toggleContainer, gauge);
+    gaugeToggleContainer.setAlignment(Pos.CENTER);
 
-        Button backButton = createBackButton(modeSelectionScene);
+    VBox controlPanel = new VBox(30, gaugeToggleContainer, acSlider, acSpeedLabel, acDirectionLabel);
+    controlPanel.setAlignment(Pos.CENTER);
+    controlPanel.setPadding(new Insets(30));
+    controlPanel.setStyle(
+        "-fx-background-color: " + SECONDARY_COLOR + "; " +
+        "-fx-background-radius: 20px; " +
+        "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 15, 0, 0, 0);"
+    );
 
-        VBox root = new VBox(40, controlPanel, backButton);
-        root.setAlignment(Pos.CENTER);
-        root.setPadding(new Insets(40));
-        root.setStyle("-fx-background-color: " + PRIMARY_COLOR + ";");
+    Button backButton = createBackButton(modeSelectionScene);
 
-        airConditionerScene = new Scene(root, 800, 900);
-    }
+    VBox root = new VBox(40, controlPanel, backButton);
+    root.setAlignment(Pos.CENTER);
+    root.setPadding(new Insets(40));
+    root.setStyle("-fx-background-color: " + PRIMARY_COLOR + ";");
+
+    airConditionerScene = new Scene(root, 800, 900);
+}
 
     private Button createModeButton(String text, String baseColor) {
         Button button = new Button(text);
@@ -354,40 +498,65 @@ public class App extends Application {
 
     private void initializeMotor() {
         if (motorInitialized) {
+            initButton.setDisable(true);
             statusLabel.setText("Status: Motor already initialized");
-            return;
+        }else{
+        
+            statusLabel.setText("Status: Initializing motor...");
+            initButton.setDisable(true);
+            motorInitialized = true;
+
+            slider.setDisable(false);
+            clockwiseBtn.setDisable(false);
+            counterClockwiseBtn.setDisable(false);
+
+            slider.setValue(0); 
+            clockwiseBtn.setSelected(true); 
+
+            serialCommManager.startPeriodicTransmission(() -> {
+                Platform.runLater(() -> handleConnectionError(serialCommManager));
+            });
         }
-        
-        statusLabel.setText("Status: Initializing motor...");
-        initButton.setDisable(true);
-        
-        new Thread(() -> {
-            try {
-                Thread.sleep(500);
-                
-                Platform.runLater(() -> {
-                    motorInitialized = true;
-                    statusLabel.setText("Status: Motor initialized and ready");
-                    
-                    slider.setDisable(false);
-                    clockwiseBtn.setDisable(false);
-                    counterClockwiseBtn.setDisable(false);
-                    
-                    slider.setValue(0); 
-                    clockwiseBtn.setSelected(true); 
-                    updateMotorSpeed(0);
-                    updateMotorDirection();
-                    bridgeValue();
-                });
-            } catch (InterruptedException e) {
-                Platform.runLater(() -> {
-                    statusLabel.setText("Status: Initialization failed");
-                    initButton.setDisable(false);
-                });
-            }
-        }).start();
     }
-private void updateMotorSpeed(int sliderValue) {
+        
+    private void toggleState() {
+        isOn = !isOn;
+        animateToggle();
+        updateToggleUI();
+        updateControlState();
+    }
+    
+    private void animateToggle() {
+        TranslateTransition transition = new TranslateTransition(Duration.millis(200), toggleKnob);
+        transition.setToX(isOn ? 30 : -30); 
+        transition.play();
+    }
+
+    private void updateToggleUI() {
+        if (isOn) {
+            toggleBackground.setFill(Color.GREEN.darker());
+            
+            
+            statusText.setText("ON");
+            statusText.setTranslateX(-15);
+        } else {
+            toggleBackground.setFill(Color.RED.darker());
+            statusText.setText("OFF");
+            statusText.setTranslateX(15);
+        }
+    }
+    
+    private void updateControlState() {
+        
+        acSlider.setDisable(!isOn);
+        if (isOn) {
+            acSlider.setValue(0);
+            updateACStatus(0);
+            initializeMotor();
+        }
+    }
+    
+    private void updateMotorSpeed(int sliderValue) {
         if (!motorInitialized) {
             statusLabel.setText("Status: Please initialize motor first");
             return;
@@ -435,8 +604,8 @@ private void updateMotorSpeed(int sliderValue) {
         motorDirectionLabel.setText(motorDirection);
     }
 
-    private char bridgeValue() {
-        if (!motorInitialized) return 0;
+    private byte bridgeValue() {
+        if (!motorInitialized || !isOn) return 0;
         
         int mappedSpeed;
         boolean isNormalMode = (primaryStage.getScene() == normalMotorControlScene);
@@ -450,7 +619,7 @@ private void updateMotorSpeed(int sliderValue) {
         }
 
         int directionBit = clockwiseDirection ? 0 : 1;
-        char result = (char) ((frameCounter << 5) | (directionBit << 4) | mappedSpeed);
+        byte result = (byte)((directionBit << 4) | mappedSpeed);
 
         System.out.printf("Mode: %s, Slider: %d, Speed: %d, Dir: %s, Binary: %08d%n",
             isNormalMode ? "NORMAL" : "AC",
@@ -459,7 +628,6 @@ private void updateMotorSpeed(int sliderValue) {
             directionBit == 0 ? "CW" : "CCW",
             Integer.parseInt(Integer.toBinaryString(result & 0xFF)));
         
-        frameCounter = (frameCounter + 1) & 0x07;
         return result;
     }
 
