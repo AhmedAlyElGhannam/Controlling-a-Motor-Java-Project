@@ -1,0 +1,22 @@
+@startwbs
+* Controlling Motor Using JavaFX Application
+** Documentation
+*** Presentation (Omar)
+*** Report (Ahmed & Rahma)
+** MCU Motor Control
+*** Firmware Drivers
+**** MTIMER0 + MPWM (Rahma)
+**** MUSART (Omar)
+**** HSCHEDULER (Ahmed)
+**** HMOTOR (Rahma)
+*** Control Logic (Ahmed)
+** JavaFX GUI
+*** GUI --- Normal Mode (Rahma)
+*** GUI --- A/C Mode (Rahma)
+*** GUI --- Main Menu (Omar)
+*** GUI Sliders Event Handlers (Omar)
+*** GUI Buttons Event Handlers (Omar)
+*** SerialCommManager (Ahmed)
+*** GUI & SerialCommManager Intergration (Ahmed)
+@endwbs
+
