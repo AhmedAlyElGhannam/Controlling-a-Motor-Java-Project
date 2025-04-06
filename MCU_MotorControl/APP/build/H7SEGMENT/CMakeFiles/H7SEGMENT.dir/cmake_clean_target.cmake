@@ -1,3 +1,0 @@
-file(REMOVE_RECURSE
-  "libH7SEGMENT.a"
-)

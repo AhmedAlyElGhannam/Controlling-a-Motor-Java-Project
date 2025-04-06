@@ -1,2 +1,0 @@
-/usr/bin/avr-ar qc libMEXTI.a CMakeFiles/MEXTI.dir/src/MEXTI.c.obj
-/usr/bin/avr-ranlib libMEXTI.a
