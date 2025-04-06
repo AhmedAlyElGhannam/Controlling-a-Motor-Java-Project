@@ -1,0 +1,3 @@
+Main-Class: App
+Class-Path: jars/jSerialComm-2.11.0.jar jars/medusa-8.3.jar
+
