@@ -1,0 +1,29 @@
+@startuml
+actor User
+participant GUI
+participant SerialCommManager
+participant MCU
+participant MotorControl
+
+== User Interaction with Modes ==
+User -> GUI: Enter Normal Mode
+GUI -> GUI: Restore last slider value for normal mode
+
+loop every 500ms
+	alt User -> GUI: Move slider or change direction or neither
+		GUI -> SerialCommManager: setLastSentByte(value)
+		note right: Value used in next\nstartPeriodicTransmission loop
+	end
+
+	alt User -> GUI: Switch to Fancy Mode
+		GUI -> GUI: Store last normal mode slider value
+		GUI -> GUI: Load last fancy mode slider value
+	end
+	
+	alt User -> GUI: Move slider in Fancy Mode
+		GUI -> SerialCommManager: setLastSentByte(newValue)
+	end
+end
+
+@enduml
+

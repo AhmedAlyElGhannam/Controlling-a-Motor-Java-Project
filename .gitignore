@@ -1,3 +1,4 @@
-build/
+*.class
 .vscode/
 target/
+build/

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=A/C Control
+Comment=JavaFX app launcher
+Exec=/home/nemesis/Playground/Toolchains/jdk1.8.0_431/bin/java -jar /home/nemesis/Playground/Github_Repositories/ITI_EmbeddedAndroid/Controlling-a-Motor-Java-Project/JavaFX_App_Full/MotorControl.jar
+Icon=/home/nemesis/Playground/Github_Repositories/ITI_EmbeddedAndroid/Controlling-a-Motor-Java-Project/JavaFX_App_Full/icon/MotorControl.png
+Terminal=false
+Type=Application
+Categories=Utility;
+

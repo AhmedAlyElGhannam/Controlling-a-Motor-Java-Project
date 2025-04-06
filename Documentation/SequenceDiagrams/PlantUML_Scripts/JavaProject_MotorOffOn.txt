@@ -1,0 +1,23 @@
+@startuml
+actor User
+participant GUI
+participant SerialCommManager
+participant MCU
+participant MotorControl
+
+== Deactivating & Reactivating Motor ==
+User -> GUI: Back to Main Menu
+
+loop every 500ms
+	alt User -> GUI: Press "Turn Off Motor"
+		GUI -> SerialCommManager: setLastSentByte(0x00)
+		note right: All mode sliders reset
+	else User -> GUI: Press "Turn On Motor"
+		GUI -> GUI: Reset sliders to default (0)
+		GUI -> SerialCommManager: setLastSentByte(0x00)
+		note right: User must re-enter mode to\nmanipulate speed/direction again
+	end
+end
+
+@enduml
+
