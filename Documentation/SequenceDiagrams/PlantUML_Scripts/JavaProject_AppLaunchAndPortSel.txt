@@ -1,0 +1,21 @@
+@startuml
+actor User
+participant GUI
+participant SerialCommManager
+participant MCU
+participant MotorControl
+
+== App Launch & Port Selection ==
+User -> GUI: Launch application
+GUI -> SerialCommManager: listAvailablePorts()
+alt No ports found
+    GUI -> User: Show error dialog
+    GUI -> GUI: Terminate app
+else Ports found
+    GUI -> User: Prompt port selection
+    User -> GUI: Select port
+    GUI -> SerialCommManager: connectToPort(portName)
+end
+
+@enduml
+

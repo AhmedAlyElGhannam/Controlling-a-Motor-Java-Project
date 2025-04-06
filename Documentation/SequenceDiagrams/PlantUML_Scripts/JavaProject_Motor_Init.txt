@@ -1,0 +1,27 @@
+@startuml
+actor User
+participant GUI
+participant SerialCommManager
+participant MCU
+participant MotorControl
+
+== Motor Initialization ==
+GUI -> User: Prompt to initialize motor
+User -> GUI: Click "Initialize Motor"
+GUI -> SerialCommManager: startPeriodicTransmission()
+
+loop every 500ms
+    GUI -> MCU: Send speed data byte
+    MCU -> MCU: echoReceivedByte(byte)
+    MCU -> GUI: Send ACK (0xFF)
+
+    alt ACK received
+        GUI -> GUI: Continue transmission
+    else ACK not received
+        GUI -> User: Show error dialog (Retry / Exit)
+        User -> GUI: Retry or Exit
+    end
+end
+
+@enduml
+

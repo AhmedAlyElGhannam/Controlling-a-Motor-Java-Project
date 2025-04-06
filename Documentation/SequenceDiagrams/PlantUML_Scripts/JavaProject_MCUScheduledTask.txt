@@ -1,0 +1,45 @@
+@startuml
+actor User
+participant GUI
+participant SerialCommManager
+participant MCU
+participant MotorControl
+
+== MCU Scheduled Task (Every 250ms) ==
+loop every 250ms
+    MCU -> MotorControl: APP_voidScheduledControlFunc()
+
+    alt Byte received within 5s
+        MCU -> MCU: Extract ID, Direction, Speed
+
+        alt Byte ID == Previous Byte ID
+            MCU -> LED: Turn ON "Invalid ID"
+            MCU -> MCU: Discard byte
+        else
+            LED -> LED: Turn OFF "Invalid ID"
+            
+            alt Direction reversed
+                MotorControl -> MotorControl: Brake motor
+                MotorControl -> MotorControl: Set new direction
+                MotorControl -> MotorControl: Set speed
+                LED -> LED: Turn ON "Direction Reversed"
+            else
+                MotorControl -> MotorControl: Set direction
+                MotorControl -> MotorControl: Set speed
+                LED -> LED: Turn OFF "Direction Reversed"
+            end
+
+            LED -> LED: Turn ON "Valid Transaction"
+        end
+
+        LED -> LED: Turn OFF "Timeout"
+        MCU -> MCU: Reset timeout counter
+
+    else Timeout > 5s
+        MotorControl -> MotorControl: Stop motor
+        LED -> LED: Turn ON "Timeout"
+    end
+end
+
+@enduml
+
