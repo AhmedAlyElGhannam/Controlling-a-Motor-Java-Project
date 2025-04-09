@@ -1,0 +1,108 @@
+@startuml
+actor User
+participant GUI
+participant SerialCommManager
+participant MCU
+participant MotorControl
+participant LED
+
+== 1. App Launch & Port Selection ==
+User -> GUI: Launch application
+GUI -> SerialCommManager: listAvailablePorts()
+alt No ports found
+    GUI -> User: Show error dialog
+    GUI -> GUI: Terminate app
+else Ports found
+    GUI -> User: Prompt port selection
+    User -> GUI: Select port
+    GUI -> SerialCommManager: connectToPort(portName)
+end
+
+== 2. Motor Initialization ==
+GUI -> User: Prompt to initialize motor
+User -> GUI: Click "Initialize Motor"
+GUI -> SerialCommManager: startPeriodicTransmission()
+
+loop every 500ms
+    GUI -> MCU: Send speed data byte
+    MCU -> MCU: echoReceivedByte(byte)
+    MCU -> GUI: Send ACK (0xFF)
+
+    alt ACK received
+        GUI -> GUI: Continue transmission
+    else ACK not received
+        GUI -> User: Show error dialog (Retry / Exit)
+        User -> GUI: Retry or Exit
+    end
+end
+
+== 3. User Interaction with Modes ==
+User -> GUI: Enter Normal Mode
+GUI -> GUI: Restore last slider value for normal mode
+
+loop every 500ms
+    alt User -> GUI: Move slider or change direction or neither
+        GUI -> SerialCommManager: setLastSentByte(value)
+    end
+
+    alt User -> GUI: Switch to Fancy Mode
+        GUI -> GUI: Store last normal mode slider value
+        GUI -> GUI: Load last fancy mode slider value
+    end
+
+    alt User -> GUI: Move slider in Fancy Mode
+        GUI -> SerialCommManager: setLastSentByte(newValue)
+    end
+end
+
+== 4. Motor On/Off ==
+User -> GUI: Back to Main Menu
+
+loop every 500ms
+    alt User -> GUI: Press "Turn Off Motor"
+        GUI -> SerialCommManager: setLastSentByte(0x00)
+        note right: All mode sliders reset
+    else User -> GUI: Press "Turn On Motor"
+        GUI -> GUI: Reset sliders to default (0)
+        GUI -> SerialCommManager: setLastSentByte(0x00)
+        note right: User must re-enter mode to\nmanipulate speed/direction again
+    end
+end
+
+== 5. MCU Scheduled Task (Every 250ms) ==
+loop every 250ms
+    MCU -> MotorControl: APP_voidScheduledControlFunc()
+
+    alt Byte received within 5s
+        MCU -> MCU: Extract ID, Direction, Speed
+
+        alt Byte ID == Previous Byte ID
+            MCU -> LED: Turn ON "Invalid ID"
+            MCU -> MCU: Discard byte
+        else
+            LED -> LED: Turn OFF "Invalid ID"
+
+            alt Direction reversed
+                MotorControl -> MotorControl: Brake motor
+                MotorControl -> MotorControl: Set new direction
+                MotorControl -> MotorControl: Set speed
+                LED -> LED: Turn ON "Direction Reversed"
+            else
+                MotorControl -> MotorControl: Set direction
+                MotorControl -> MotorControl: Set speed
+                LED -> LED: Turn OFF "Direction Reversed"
+            end
+
+            LED -> LED: Turn ON "Valid Transaction"
+        end
+
+        LED -> LED: Turn OFF "Timeout"
+        MCU -> MCU: Reset timeout counter
+    else Timeout > 5s
+        MotorControl -> MotorControl: Stop motor
+        LED -> LED: Turn ON "Timeout"
+    end
+end
+
+@enduml
+
