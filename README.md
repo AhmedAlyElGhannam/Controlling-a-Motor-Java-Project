@@ -22,7 +22,8 @@ The tools, technologies, and libraries used are as follows:
 1. Python3 &rarr; scripts to test the functionality of each part of the project separately.
 
 ## System Architecture
-> System architecture can be summarized in the following sequence diagram. For more info, you can view the [project's full documentation]().
+> System architecture can be summarized in the following sequence diagram. For more info, you can view the [project's full documentation](https://github.com/AhmedAlyElGhannam/Controlling-a-Motor-Java-Project/blob/main/Documentation/JavaProjectDoc.pdf).
+> 
 ![](./Documentation/SequenceDiagrams/CombinedSequenceDiagram/FullSD.png)
 
 ## Requirements
@@ -85,4 +86,8 @@ This part is not relevant anymore but it will still be left here for reference.
 - [x] Scheduled function that does the speed control logic. **A**
 
 ## Video Demo
+
+
+https://github.com/user-attachments/assets/43211ef6-6182-4107-b9ca-c02f2d543831
+
 
