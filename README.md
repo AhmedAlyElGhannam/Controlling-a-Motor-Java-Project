@@ -1,5 +1,25 @@
 # Controlling-a-Motor-Java-Project
 
+## Introduction
+This is the final project of the Developing Applications Using Java course taught in Information Technology Institute (ITI)'s 9-Month Professional Training Program -- Embedded Systems Track as a part of the intensive Android Automotive subfield under the supervision of Eng. Ahmed Mazen from Java Education & Technology Services department.
+
+## About The Team
+This project was made by Team #4 whose members are:
+1. Ahmed Aly El-Ghannam.
+1. Omar Mostafa.
+1. Rahma Abdelkader.
+
+## Brief
+The project, as the name suggests, is a JavaFX GUI application built to control a DC motor rotation speed and direction. Additionally, as a team, we have decided to pick a use case theme for the application as an air conditioner control app. Functionally, it does the exact same job but aesthetically, it makes all the difference. :)
+
+## Technology Stack
+The tools, technologies, and libraries used are as follows:
+1. JDK 8 + JFX8.
+1. Make.
+1. CMake.
+1. Python3.
+
+
 # Tasks --- Java:
 - [x] SerialCommManager class for handling USART communication periodically.  **A**
 - [x] GUI for Required Scene. **R**
