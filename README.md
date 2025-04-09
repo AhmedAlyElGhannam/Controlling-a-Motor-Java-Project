@@ -5,9 +5,9 @@ This is the final project of the Developing Applications Using Java course taugh
 
 ## About The Team
 This project was made by Team #4 whose members are:
-1. Ahmed Aly El-Ghannam.
-1. Omar Mostafa.
-1. Rahma Abdelkader.
+1. [Ahmed Aly El-Ghannam](https://github.com/AhmedAlyElGhannam).
+1. [Omar Mohamed Mostafa](https://github.com/omarmohamedmoustafa).
+1. [Rahma Abdelkader](https://github.com/rahmaabdelkader2).
 
 ## Brief
 The project, as the name suggests, is a JavaFX GUI application built to control a DC motor rotation speed and direction---this is done by making the app communicate with an MCU to do the actual motor control logic. Additionally, as a team, we have decided to pick a use case theme for the application as an air conditioner control app. Functionally, it does the exact same job but aesthetically, it makes all the difference. :)
